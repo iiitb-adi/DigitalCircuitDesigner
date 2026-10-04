@@ -1,0 +1,72 @@
+@startuml
+
+abstract class CircuitElement {
+    - name : string
+    + clone() : unique_ptr<CircuitElement>
+    + evaluate() : void
+    + getInputCount() : int
+    + getOutputCount() : int
+    + setInput(index, value) : void
+    + getOutput(index) : bool
+}
+
+class Gate
+class Circuit
+class Connection
+
+CircuitElement <|-- Gate
+CircuitElement <|-- Circuit
+
+class NANDGate
+class NORGate
+class NOTGate
+class ANDGate
+class ORGate
+class XORGate
+class XNORGate
+
+Gate <|-- NANDGate
+Gate <|-- NORGate
+Gate <|-- NOTGate
+Gate <|-- ANDGate
+Gate <|-- ORGate
+Gate <|-- XORGate
+Gate <|-- XNORGate
+
+class HalfAdder
+class FullAdder
+class RippleCarryAdder
+class Decoder
+class Encoder
+class Comparator
+
+Circuit <|-- HalfAdder
+Circuit <|-- FullAdder
+Circuit <|-- RippleCarryAdder
+
+Circuit o-- CircuitElement : contains
+Circuit o-- Connection : uses
+
+CircuitElement <|-- Decoder
+CircuitElement <|-- Encoder
+CircuitElement <|-- Comparator
+
+class Simulator {
+    + simulate(circuit, inputRows) : SimulationResult
+    + getLastWorkerCount() : size_t
+}
+class SimulationResult
+abstract class Output
+class ConsoleOutput
+class CSVOutput
+class TruthTableGenerator
+
+Simulator --> Circuit
+Simulator --> SimulationResult
+TruthTableGenerator --> Simulator
+TruthTableGenerator --> SimulationResult
+Output --> SimulationResult
+Output <|-- ConsoleOutput
+Output <|-- CSVOutput
+
+@enduml
