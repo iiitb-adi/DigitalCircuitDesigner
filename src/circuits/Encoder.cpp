@@ -1,31 +1,46 @@
 #include "circuits/Encoder.h"
-#include <stdexcept>
+#include "gates/ORGate.h"
 
-Encoder::Encoder() : CircuitElement("4-to-2 Encoder"), inputs{false, false, false, false}, outputs{false, false} {}
+Encoder::Encoder()
+    : CircuitElement("4-to-2 Encoder"),
+      circuit("4-to-2 Encoder Internal", 4, 2) {
 
-void Encoder::evaluate() {
-    outputs[0] = false;
-    outputs[1] = false;
-    for (int i = 0; i < 4; ++i) {
-        if (inputs[i]) {
-            outputs[0] = (i & 2) != 0;
-            outputs[1] = (i & 1) != 0;
-            return;
-        }
-    }
+    auto& msb = circuit.addElement<ORGate>();
+    auto& lsb = circuit.addElement<ORGate>();
+
+    // One-hot encoder:
+    // Y0 Y1 Y2 Y3 -> A B
+
+    circuit.connectInput(2, msb, 0);
+    circuit.connectInput(3, msb, 1);
+
+    circuit.connectInput(1, lsb, 0);
+    circuit.connectInput(3, lsb, 1);
+
+    circuit.connectOutput(msb, 0, 0);
+    circuit.connectOutput(lsb, 0, 1);
 }
 
-int Encoder::getInputCount() const { return 4; }
-int Encoder::getOutputCount() const { return 2; }
+void Encoder::evaluate() {
+    circuit.evaluate();
+}
+
+int Encoder::getInputCount() const {
+    return circuit.getInputCount();
+}
+
+int Encoder::getOutputCount() const {
+    return circuit.getOutputCount();
+}
 
 void Encoder::setInput(std::size_t index, bool value) {
-    if (index >= 4) throw std::out_of_range("Encoder input index out of range");
-    inputs[index] = value;
+    circuit.setInput(index, value);
 }
 
 bool Encoder::getOutput(std::size_t index) const {
-    if (index >= 2) throw std::out_of_range("Encoder output index out of range");
-    return outputs[index];
+    return circuit.getOutput(index);
 }
 
-std::unique_ptr<CircuitElement> Encoder::clone() const { return std::make_unique<Encoder>(*this); }
+std::unique_ptr<CircuitElement> Encoder::clone() const {
+    return std::make_unique<Encoder>();
+}
