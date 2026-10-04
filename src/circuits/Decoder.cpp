@@ -1,25 +1,66 @@
 #include "circuits/Decoder.h"
-#include <stdexcept>
+#include "gates/ANDGate.h"
+#include "gates/NOTGate.h"
 
-Decoder::Decoder() : CircuitElement("2-to-4 Decoder"), inputs{false, false}, outputs{false, false, false, false} {}
+Decoder::Decoder()
+    : CircuitElement("2-to-4 Decoder"),
+      circuit("2-to-4 Decoder Internal", 2, 4) {
 
-void Decoder::evaluate() {
-    for (bool& output : outputs) output = false;
-    const std::size_t selected = (static_cast<std::size_t>(inputs[0]) << 1) | static_cast<std::size_t>(inputs[1]);
-    outputs[selected] = true;
+    auto& notA = circuit.addElement<NOTGate>();
+    auto& notB = circuit.addElement<NOTGate>();
+
+    auto& y0 = circuit.addElement<ANDGate>();
+    auto& y1 = circuit.addElement<ANDGate>();
+    auto& y2 = circuit.addElement<ANDGate>();
+    auto& y3 = circuit.addElement<ANDGate>();
+
+    circuit.connectInput(0, notA, 0);
+    circuit.connectInput(1, notB, 0);
+
+    // Y0 = !A AND !B
+    circuit.connect(notA, 0, y0, 0);
+    circuit.connect(notB, 0, y0, 1);
+
+    // Y1 = !A AND B
+    circuit.connect(notA, 0, y1, 0);
+    circuit.connectInput(1, y1, 1);
+
+    // Y2 = A AND !B
+    circuit.connectInput(0, y2, 0);
+    circuit.connect(notB, 0, y2, 1);
+
+    // Y3 = A AND B
+    circuit.connectInput(0, y3, 0);
+    circuit.connectInput(1, y3, 1);
+
+    circuit.connectOutput(y0, 0, 0);
+    circuit.connectOutput(y1, 0, 1);
+    circuit.connectOutput(y2, 0, 2);
+    circuit.connectOutput(y3, 0, 3);
+
+    circuit.setLogicDepth(1);
 }
 
-int Decoder::getInputCount() const { return 2; }
-int Decoder::getOutputCount() const { return 4; }
+void Decoder::evaluate() {
+    circuit.evaluate();
+}
+
+int Decoder::getInputCount() const {
+    return circuit.getInputCount();
+}
+
+int Decoder::getOutputCount() const {
+    return circuit.getOutputCount();
+}
 
 void Decoder::setInput(std::size_t index, bool value) {
-    if (index >= 2) throw std::out_of_range("Decoder input index out of range");
-    inputs[index] = value;
+    circuit.setInput(index, value);
 }
 
 bool Decoder::getOutput(std::size_t index) const {
-    if (index >= 4) throw std::out_of_range("Decoder output index out of range");
-    return outputs[index];
+    return circuit.getOutput(index);
 }
 
-std::unique_ptr<CircuitElement> Decoder::clone() const { return std::make_unique<Decoder>(*this); }
+std::unique_ptr<CircuitElement> Decoder::clone() const {
+    return std::make_unique<Decoder>();
+}
