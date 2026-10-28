@@ -1,7 +1,8 @@
+
 #ifndef COMPARATOR_H
 #define COMPARATOR_H
 
-#include "core/CircuitElement.h"
+#include "core/Circuit.h"
 #include <memory>
 
 class Comparator : public CircuitElement {
@@ -17,6 +18,8 @@ public:
 private:
     bool inputs[8];
     bool outputs[3];
+    Circuit circuit;
 };
 
 #endif
+
