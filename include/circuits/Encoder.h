@@ -1,7 +1,7 @@
 #ifndef ENCODER_H
 #define ENCODER_H
 
-#include "core/CircuitElement.h"
+#include "core/Circuit.h"
 #include <memory>
 
 class Encoder : public CircuitElement {
@@ -17,6 +17,8 @@ public:
 private:
     bool inputs[4];
     bool outputs[2];
+    Circuit circuit;
 };
 
 #endif
+
